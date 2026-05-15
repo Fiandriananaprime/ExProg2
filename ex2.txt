@@ -1,0 +1,17 @@
+1. Quelle structure Java pour représenter une catégorie ?
+Un enum. C'est exactement fait pour ça : un ensemble fini et fermé de valeurs nommées. Le compilateur garantit qu'on ne peut jamais passer autre chose qu'une des valeurs déclarées — impossible de faire new CategorieProduit("Drone") ou de passer null sans que le code le détecte.
+
+2. Est-ce que les objets Produit sont sécurisés ?
+Sans précautions, non. Voici les deux problèmes principaux et comment ils sont résolus ici :
+Problème 1 — Le setter laisse entrer n'importe quoi
+Sans validation, n'importe quelle classe peut appeler setPrixUnitaire(-9999) et le prix devient incohérent. La solution : valider dans chaque setter, exactement comme dans le constructeur. Si la valeur est invalide, on lève une IllegalArgumentException immédiatement.
+javapublic void setPrixUnitaire(double prixUnitaire) {
+    if (prixUnitaire < 0) {
+        throw new IllegalArgumentException("Le prix unitaire ne peut pas être négatif.");
+    }
+    this.prixUnitaire = prixUnitaire;
+}
+Problème 2 — L'id ne devrait jamais changer
+L'identifiant d'un objet est son identité. S'il peut être modifié après création, on casse l'égalité, les collections (HashMap, HashSet), et la cohérence globale. La solution : déclarer id en final, ce qui supprime le setter et rend la chose impossible au niveau du compilateur.
+javaprivate final int id;
+Résultat : peu importe combien de classes manipulent un Produit, les invariants (prix ≥ 0, nom non vide, catégorie non null, id immuable) sont toujours garantis — c'est ça, un objet sécurisé.Exo2ZIP Open in WinRAR archiverSonnet 4.6
